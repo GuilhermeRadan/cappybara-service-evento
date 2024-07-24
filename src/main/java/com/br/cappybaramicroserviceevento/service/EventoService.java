@@ -1,9 +1,6 @@
 package com.br.cappybaramicroserviceevento.service;
 
-import com.br.cappybaramicroserviceevento.dto.EventoCadastroDTO;
-import com.br.cappybaramicroserviceevento.dto.EventoDTO;
-import com.br.cappybaramicroserviceevento.dto.EventoResumoDTO;
-import com.br.cappybaramicroserviceevento.dto.EventoTituloDTO;
+import com.br.cappybaramicroserviceevento.dto.*;
 import com.br.cappybaramicroserviceevento.model.CaminhoImagem;
 import com.br.cappybaramicroserviceevento.model.CategoriaEvento;
 import com.br.cappybaramicroserviceevento.model.Evento;
@@ -12,7 +9,11 @@ import com.br.cappybaramicroserviceevento.repository.CategoriaEventoRepository;
 import com.br.cappybaramicroserviceevento.repository.EventoRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -91,8 +93,18 @@ public class EventoService {
                 .collect(Collectors.toList());
     }
 
-    public List<EventoResumoDTO> listarResumoEvento(){
-        List<Evento> eventos = eventoRepository.findAll();
+    public List<EventoResumoDTO> listarResumoEvento(int pagina, int itens){
+        Pageable pageable = PageRequest.of(pagina, itens);
+        Page<Evento> eventos = eventoRepository.findAll(pageable);
+        for (Evento e: eventos){
+            List<String> urlRecebidas = new ArrayList<>();
+            List<CaminhoImagem> caminhoImagem = caminhoImagemRepository.findCaminhoImagemByIdEvento(e);
+            for (CaminhoImagem c: caminhoImagem){
+                urlRecebidas.add(c.getUrl());
+            }
+
+        }
+
         return eventos.stream()
                 .map(this::convertToEventoResumoDto)
                 .collect(Collectors.toList());
@@ -153,7 +165,22 @@ public class EventoService {
 
 
     private EventoResumoDTO convertToEventoResumoDto(Evento evento) {
-        return modelMapper.map(evento, EventoResumoDTO.class);
+        EventoResumoDTO dtoResumida = new EventoResumoDTO();
+
+        List<CaminhoImagem> caminhoImagens = caminhoImagemRepository.findCaminhoImagemByIdEvento(evento);
+        List<String> urlSeparada = new ArrayList<>();
+        //separa a uri da classe CaminhoImagem
+        for (var url : caminhoImagens){
+            urlSeparada.add(url.getUrl());
+
+        }
+        dtoResumida.setId(evento.getId());
+        dtoResumida.setTitulo(evento.getTitulo());
+        dtoResumida.setDescricao(evento.getDescricao());
+        dtoResumida.setUrlImagem(urlSeparada);
+
+
+        return dtoResumida;
     }
 
 
@@ -163,14 +190,13 @@ public class EventoService {
         EventoDTO dto = new EventoDTO();
 
         List<CaminhoImagem> caminhoImagens = caminhoImagemRepository.findCaminhoImagemByIdEvento(evento);
-
+        List<String> urlSeparada = new ArrayList<>();
         //separa a uri da classe CaminhoImagem
         for (var url : caminhoImagens){
-            List<String> urlSeparada = new ArrayList<>();
             urlSeparada.add(url.getUrl());
-            dto.setImagens(urlSeparada);
-        }
 
+        }
+        dto.setImagens(urlSeparada);
         dto.setTitulo(evento.getTitulo());
         dto.setDescricao(evento.getDescricao());
         dto.setDataHoraInicio(evento.getDataHoraInicio());
@@ -188,5 +214,11 @@ public class EventoService {
     }
 
 
-
+   /* public EventoDTO atualizacaoEvento(Long id, EventoAtualizacaoDTO eventoAtualizacaoDTO) {
+        Optional<Evento> optionalEvento = eventoRepository.findById(id);
+        if (optionalEvento.isPresent()){
+            Evento eventoExistente = optionalEvento.get();
+            BeanUtils.copyProperties(eventoAtualizacaoDTO, eventoExistente, );
+        }
+    }*/
 }
