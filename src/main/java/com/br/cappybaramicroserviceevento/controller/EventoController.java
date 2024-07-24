@@ -3,6 +3,7 @@ package com.br.cappybaramicroserviceevento.controller;
 import com.br.cappybaramicroserviceevento.dto.EventoCadastroDTO;
 import com.br.cappybaramicroserviceevento.dto.EventoDTO;
 import com.br.cappybaramicroserviceevento.dto.EventoResumoDTO;
+import com.br.cappybaramicroserviceevento.model.Evento;
 import com.br.cappybaramicroserviceevento.service.EventoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,28 +87,23 @@ public class EventoController {
 
     @CrossOrigin(origins = "*")
     @GetMapping("/listar-resumo-evento")
-    public List<EventoResumoDTO>listarResumoEvento(){
-        return eventoService.listarResumoEvento();
+    public ResponseEntity<List<EventoResumoDTO>> listarResumoEvento(@RequestParam int pagina, @RequestParam int itens ){
+        return ResponseEntity.ok(eventoService.listarResumoEvento(pagina, itens));
     }
-
-
-
-
 
 
 
     @CrossOrigin(origins = "*")
     @GetMapping("/listar/categoria-id/{id}")
-    public List<EventoDTO> listarEventoPorCategoria(@PathVariable Long id){
+    public List<EventoDTO> listarEventoPorCategoriaId(@PathVariable Long id){
         return eventoService.listarPorCategoriaId(id);
     }
+    /*@CrossOrigin("*")
+    @PatchMapping("/atualizar")
+    public EventoDTO atualizaçãoEvento(@PathVariable Long id, @RequestBody Evento evento){
+        return eventoService.atualizacaoEvento(id, evento);
+    }*/
 
-
-
-    @GetMapping("/listar-evento-resumo")
-    public List<EventoResumoDTO> listarEventoResumo(){
-        return eventoService.listarResumoEvento();
-    }
 
 
 }

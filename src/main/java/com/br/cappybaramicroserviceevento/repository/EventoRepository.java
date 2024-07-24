@@ -3,6 +3,8 @@ package com.br.cappybaramicroserviceevento.repository;
 
 
 import com.br.cappybaramicroserviceevento.model.Evento;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,11 +12,12 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Repository
 public interface EventoRepository extends JpaRepository<Evento, Long> {
+
+    Page<Evento> findAll (Pageable pageable);
     List<Evento> findEventoByCategoriaEvento_Id(Long id);
 
     List<Evento> findEventosByCategoriaEvento_IdIn(List<Long> ids);

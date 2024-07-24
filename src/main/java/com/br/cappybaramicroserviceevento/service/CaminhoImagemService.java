@@ -45,9 +45,21 @@ public class CaminhoImagemService {
 
     }
 
-   /* public List<CaminhoImagem> buscarPorIdEvento(Long id){
-        return caminhoImagemRepository.findAllCaminhoImagemByIdEvento(id);
-    }*/
+    public String popularBanco(Long id, List<MultipartFile> imagens) throws IOException {
+        for (var arquivo: imagens){
+            BlobClient blob = blobContainerClient.getBlobClient(arquivo.getOriginalFilename());
+            blob.upload(arquivo.getInputStream(), arquivo.getSize(), true);
+            String uri = blob.getBlobUrl();
+
+            Evento evento = new Evento();
+            evento.setId(id);
+            CaminhoImagem caminhoImagem = new CaminhoImagem();
+            caminhoImagem.setUrl(uri);
+            caminhoImagem.setIdEvento(evento);
+            caminhoImagemRepository.save(caminhoImagem);
+        }
+        return "";
+    }
 
     public String uploadImagens(List<MultipartFile> imagens, Evento idEvento) throws IOException {
         for (var arquivo: imagens){

@@ -3,11 +3,16 @@ package com.br.cappybaramicroserviceevento.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "tb_categoria_evento")
 public class CategoriaEvento implements Serializable {
@@ -23,27 +28,4 @@ public class CategoriaEvento implements Serializable {
     @OneToMany(mappedBy = "categoriaEvento")
     private Set<Evento> eventos = new HashSet<>();
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public Set<Evento> getEventos() {
-        return eventos;
-    }
-
-    public void setEventos(Set<Evento> eventos) {
-        this.eventos = eventos;
-    }
 }
