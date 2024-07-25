@@ -1,6 +1,9 @@
 package com.br.cappybaramicroserviceevento.service;
 
 import com.br.cappybaramicroserviceevento.dto.*;
+import com.br.cappybaramicroserviceevento.exceptions.CategoriaIdNotFoundException;
+import com.br.cappybaramicroserviceevento.exceptions.EventIdNotFoundException;
+import com.br.cappybaramicroserviceevento.exceptions.EventoNotFoundException;
 import com.br.cappybaramicroserviceevento.model.CaminhoImagem;
 import com.br.cappybaramicroserviceevento.model.CategoriaEvento;
 import com.br.cappybaramicroserviceevento.model.Evento;
@@ -9,7 +12,6 @@ import com.br.cappybaramicroserviceevento.repository.CategoriaEventoRepository;
 import com.br.cappybaramicroserviceevento.repository.EventoRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +24,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -49,6 +50,9 @@ public class EventoService {
         Evento evento = new Evento();
 
         Optional<CategoriaEvento> categoriaEvento = categoriaEventoRepository.findById(eventoCadastroDTO.getCategoriaEvento());
+        if (categoriaEvento.isEmpty()){
+            throw new CategoriaIdNotFoundException("Id categoria não encontrado");
+        }
         categoriaEvento.ifPresent(evento::setCategoriaEvento);
 
         evento.setTitulo(eventoCadastroDTO.getTitulo());
@@ -59,7 +63,7 @@ public class EventoService {
         evento.setLongitude(eventoCadastroDTO.getLongitude());
         evento.setPreco(eventoCadastroDTO.getPreco());
         evento.setArtistas(eventoCadastroDTO.getArtistas());
-        var eventoSalvo =eventoRepository.save(evento);
+        var eventoSalvo = eventoRepository.save(evento);
 
         caminhoImagemService.uploadImagens(imagens,eventoSalvo);
         return eventoSalvo;
@@ -69,15 +73,18 @@ public class EventoService {
     public EventoDTO listarEventoPorId(Long id){
         Optional<Evento> busca = eventoRepository.findById(id);
         if (busca.isPresent()){
-            var resultado = toDTO(busca.get());
-            return resultado;
-        }
+            return toDTO(busca.get());
 
-        return null;
+        }
+        throw new EventIdNotFoundException("Id do evento: " + id + ", não encontrado!");
+
     }
 
     public List<EventoDTO> listarPorCategoriaId(Long id){
         List<Evento> listar = eventoRepository.findEventoByCategoriaEvento_Id(id);
+        if(listar.isEmpty()){
+            throw new CategoriaIdNotFoundException("Id categoria não encontrado", id);
+        }
         return listar.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
@@ -88,6 +95,7 @@ public class EventoService {
     public List<EventoDTO> listarEventos(){
         List<Evento> eventos = eventoRepository.findAll();
 
+
         return eventos.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
@@ -96,6 +104,10 @@ public class EventoService {
     public List<EventoResumoDTO> listarResumoEvento(int pagina, int itens){
         Pageable pageable = PageRequest.of(pagina, itens);
         Page<Evento> eventos = eventoRepository.findAll(pageable);
+        if(eventos.isEmpty()){
+            throw new EventoNotFoundException("Eventos não encontrados !");
+        }
+
         for (Evento e: eventos){
             List<String> urlRecebidas = new ArrayList<>();
             List<CaminhoImagem> caminhoImagem = caminhoImagemRepository.findCaminhoImagemByIdEvento(e);
@@ -120,6 +132,9 @@ public class EventoService {
 
     public List<EventoResumoDTO> listarPorDataHoje() {
         List<Evento> eventos = eventoRepository.findEventosByDataHoje(LocalDate.now());
+        if(eventos.isEmpty()){
+            throw new EventoNotFoundException("Não existe evento para hoje !");
+        }
         return eventos.stream()
                 .map(this::convertToEventoResumoDto)
                 .collect(Collectors.toList());
@@ -129,6 +144,9 @@ public class EventoService {
         LocalDate dataHoje = LocalDate.now();
         LocalDate dataAmanha = dataHoje.plusDays(1);
         List<Evento> eventos = eventoRepository.findEventosByDataAmanha(dataAmanha);
+        if(eventos.isEmpty()){
+            throw new EventoNotFoundException("Não existe evento para amanhã !");
+        }
         return eventos.stream()
                 .map(this::convertToEventoResumoDto)
                 .collect(Collectors.toList());
@@ -138,6 +156,9 @@ public class EventoService {
         LocalDate dataHoje = LocalDate.now();
         LocalDate data7dias = dataHoje.plusDays(6);
         List<Evento> eventos = eventoRepository.findEventosByDataSemana(dataHoje, data7dias);
+        if(eventos.isEmpty()){
+            throw new EventoNotFoundException("Não existe evento para essa semana !");
+        }
         return eventos.stream()
                 .map(this::convertToEventoResumoDto)
                 .collect(Collectors.toList());
@@ -145,6 +166,9 @@ public class EventoService {
 
     public List<EventoResumoDTO> listarPorDataCalendario(LocalDate data){
         List<Evento> eventos = eventoRepository.findEventosByCalendario(data);
+        if(eventos.isEmpty()){
+            throw new EventoNotFoundException("Não existe evento para essa data!");
+        }
         return eventos.stream()
                 .map(this::convertToEventoResumoDto)
                 .collect(Collectors.toList());
