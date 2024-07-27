@@ -50,8 +50,6 @@ public class EventoController {
         return eventoService.listarEventoPorId(id);
     }
 
-
-
     @CrossOrigin(origins = "*")
     @GetMapping("/listar-por-faixa-preco")
     public List<EventoResumoDTO>listarPorFaixaDePreco(@RequestParam BigDecimal precoInicial, @RequestParam BigDecimal precoFinal ){

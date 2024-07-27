@@ -1,26 +1,34 @@
 package com.br.cappybaramicroserviceevento.dto;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class EventoResumoDTO {
     private Long id;
 
-
     private String titulo;
 
-    private String descricao;
+   private Double latitude;
+
+   private Double longitude;
+
+   private LocalDateTime dataHoraInicio;
 
     private List<String> urlImagem;
 
-    public EventoResumoDTO(Long id, String titulo, String descricao, List<String> urlImagem) {
+    public EventoResumoDTO(){}
+
+    public EventoResumoDTO(Long id, String titulo, Double latitude, Double longitude, LocalDateTime dataHoraInicio, List<String> urlImagem) {
         this.id = id;
         this.titulo = titulo;
-        this.descricao = descricao;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.dataHoraInicio = dataHoraInicio;
         this.urlImagem = urlImagem;
     }
 
 
-    public EventoResumoDTO(){}
 
     public Long getId() {
         return id;
@@ -46,11 +54,27 @@ public class EventoResumoDTO {
         this.titulo = titulo;
     }
 
-    public String getDescricao() {
-        return descricao;
+    public Double getLatitude() {
+        return latitude;
     }
 
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public LocalDateTime getDataHoraInicio() {
+        return dataHoraInicio;
+    }
+
+    public void setDataHoraInicio(LocalDateTime dataHoraInicio) {
+        this.dataHoraInicio = dataHoraInicio;
     }
 }

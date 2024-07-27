@@ -47,22 +47,13 @@ public class EventoService {
 
     @Transactional
     public Evento cadastrar(EventoCadastroDTO eventoCadastroDTO, List<MultipartFile> imagens) throws IOException {
-        Evento evento = new Evento();
 
         Optional<CategoriaEvento> categoriaEvento = categoriaEventoRepository.findById(eventoCadastroDTO.getCategoriaEvento());
         if (categoriaEvento.isEmpty()){
             throw new CategoriaIdNotFoundException("Id categoria não encontrado");
         }
-        categoriaEvento.ifPresent(evento::setCategoriaEvento);
 
-        evento.setTitulo(eventoCadastroDTO.getTitulo());
-        evento.setDescricao(eventoCadastroDTO.getDescricao());
-        evento.setDataHoraInicio(eventoCadastroDTO.getDataHoraInicio());
-        evento.setDataHoraTermino(eventoCadastroDTO.getDataHoraTermino());
-        evento.setLatitude(eventoCadastroDTO.getLatitude());
-        evento.setLongitude(eventoCadastroDTO.getLongitude());
-        evento.setPreco(eventoCadastroDTO.getPreco());
-        evento.setArtistas(eventoCadastroDTO.getArtistas());
+        Evento evento = converToEvento(eventoCadastroDTO, categoriaEvento.get());
         var eventoSalvo = eventoRepository.save(evento);
 
         caminhoImagemService.uploadImagens(imagens,eventoSalvo);
@@ -181,10 +172,14 @@ public class EventoService {
                 .collect(Collectors.toList());
     }
 
-
-
     public EventoTituloDTO convertToEventoTituloDTO(Evento evento){
         return modelMapper.map(evento, EventoTituloDTO.class);
+    }
+    public Evento converToEvento(EventoCadastroDTO eventoCadastroDTO, CategoriaEvento categoriaEvento){
+        Evento evento = modelMapper.map(eventoCadastroDTO, Evento.class);
+        evento.setCategoriaEvento(categoriaEvento);
+        return evento;
+
     }
 
 
@@ -200,15 +195,14 @@ public class EventoService {
         }
         dtoResumida.setId(evento.getId());
         dtoResumida.setTitulo(evento.getTitulo());
-        dtoResumida.setDescricao(evento.getDescricao());
+        dtoResumida.setDataHoraInicio(evento.getDataHoraInicio());
+        dtoResumida.setLatitude(evento.getLatitude());
+        dtoResumida.setLongitude(evento.getLongitude());
         dtoResumida.setUrlImagem(urlSeparada);
 
 
         return dtoResumida;
     }
-
-
-
 
     private EventoDTO toDTO(Evento evento) {
         EventoDTO dto = new EventoDTO();
@@ -237,12 +231,4 @@ public class EventoService {
 
     }
 
-
-   /* public EventoDTO atualizacaoEvento(Long id, EventoAtualizacaoDTO eventoAtualizacaoDTO) {
-        Optional<Evento> optionalEvento = eventoRepository.findById(id);
-        if (optionalEvento.isPresent()){
-            Evento eventoExistente = optionalEvento.get();
-            BeanUtils.copyProperties(eventoAtualizacaoDTO, eventoExistente, );
-        }
-    }*/
 }
