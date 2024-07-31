@@ -79,8 +79,8 @@ public class EventoController {
 
     @CrossOrigin(origins = "*")
     @GetMapping("/listar-por-raio-km")
-    public List<EventoResumoDTO>listarPorFaixaDePreco(@RequestParam Double latitude, @RequestParam Double longitude, Double raioEmKm ){
-        return eventoService.listarPorRaioKm(latitude, longitude, raioEmKm);
+    public List<EventoResumoDTO>listarPorRaioKm(@RequestParam Double latitude, @RequestParam Double longitude, Double raioEmKm, int pagina, int itens ){
+        return eventoService.listarPorRaioKm(latitude, longitude, raioEmKm, pagina, itens);
     }
 
     @CrossOrigin(origins = "*")

@@ -36,6 +36,6 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
     List<Evento> findEventosByCalendario(@Param("data")LocalDate data);
 
     @Query("SELECT e FROM Evento e WHERE (6371 * acos(cos(radians(:latitude)) * cos(radians(e.latitude)) * cos(radians(e.longitude) - radians(:longitude)) + sin(radians(:latitude)) * sin(radians(e.latitude)))) < :raioEmKm")
-    List<Evento> findEventosByLocalizacao(@Param("latitude") Double latitude, @Param("longitude") Double longitude, @Param("raioEmKm") Double raioEmKm);
+    Page<Evento> findEventosByLocalizacao(@Param("latitude") Double latitude, @Param("longitude") Double longitude, @Param("raioEmKm") Double raioEmKm, Pageable pageable);
 
 }

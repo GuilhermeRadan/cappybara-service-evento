@@ -165,8 +165,9 @@ public class EventoService {
                 .collect(Collectors.toList());
     }
 
-    public List<EventoResumoDTO> listarPorRaioKm(Double latitude, Double longitude, Double raioEmKm) {
-        List<Evento> eventos = eventoRepository.findEventosByLocalizacao(latitude, longitude, raioEmKm);
+    public List<EventoResumoDTO> listarPorRaioKm(Double latitude, Double longitude, Double raioEmKm, int pagina, int itens) {
+        Pageable pageable = PageRequest.of(pagina, itens);
+        Page<Evento> eventos = eventoRepository.findEventosByLocalizacao(latitude, longitude, raioEmKm, pageable);
         return eventos.stream()
                 .map(this::convertToEventoResumoDto)
                 .collect(Collectors.toList());
